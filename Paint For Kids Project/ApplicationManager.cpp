@@ -16,6 +16,7 @@
 #include "DrwColorAction.h"
 #include"colourAction.h"
 #include <cmath>
+#include <random>
 #include"VoiceAction.h"
 #include"MuteAction.h"
 #include "MoveAction.h"
@@ -208,7 +209,7 @@ void ApplicationManager::ExecuteAction(ActionType ActType)
 		if (undoable)
 		{
 			add_action(pAct);
-			number_redo = 0;
+			ClearRedo();
 		}
 		pAct->Execute();//Execute
 		bool recorded = false;
@@ -252,26 +253,6 @@ CFigure *ApplicationManager::GetFigure(Point p) const
 
 	return NULL;
 }
-bool ApplicationManager::CheckSelection(Point p) const
-{
-	if (SelectedFig == GetFigure(p) && GetFigure(p) != NULL && SelectedFig != NULL) return true;
-	return false;
-}
- int ApplicationManager::GetNUMfig(Point p) 
-{
-	//If a figure is found return a pointer to it.
-	//if this point (x,y) does not belong to any figure return NULL
-
-
-	for (int i =FigCount-1; i>=0 ; i--) {
-		if (FigList[i] != NULL && FigList[i]->isThisFigure(p)) return i;
-	}
-
-	//Add your code here to search for a figure given a point x,y	
-	//Remember that ApplicationManager only calls functions do NOT implement it.
-
-	return -1;
-}
 
 void ApplicationManager::SetSelectedFig(Point p)
 {
@@ -297,10 +278,23 @@ int ApplicationManager::GetFigCount()
 	return FigCount;
 }
 
-CFigure* ApplicationManager::Getshape(int id)
-{    
-	return FigList[id];
-   
+CFigure* ApplicationManager::GetRandomFigure(bool filledOnly)
+{
+	//one generator for the whole program (creating a random_device every time is slow)
+	static mt19937 gen(random_device{}());
+	int count = 0;
+	for (int i = 0; i < FigCount; i++)
+		if (FigList[i] != NULL && (!filledOnly || FigList[i]->colourshape() != "WHITE"))
+			count++;
+	if (count == 0)
+		return NULL;
+	//pick one of the matching figures directly (no retrying)
+	int k = uniform_int_distribution<>(0, count - 1)(gen);
+	for (int i = 0; i < FigCount; i++)
+		if (FigList[i] != NULL && (!filledOnly || FigList[i]->colourshape() != "WHITE"))
+			if (k-- == 0)
+				return FigList[i];
+	return NULL;
 }
 
 
@@ -368,22 +362,7 @@ void ApplicationManager::clearall()
 			FigList[i] = NULL;
 		}
 	}
-	for (int i = 0; i < number_undo; i++)
-	{
-		if (redo_undo_arr[i] != NULL)
-		{
-			//delete redo_undo_arr[i];
-			redo_undo_arr[i] = NULL;
-		}
-	}
-	for (int i = 0; i < number_redo; i++)
-	{
-		if (redo_arr[i] != NULL)
-		{
-			//delete redo_arr[i];
-			redo_arr[i] = NULL;
-		}
-	}
+	ClearUndoRedo(); //must be done before the recorded actions are deleted
 	for (int i = 0; i < actioncount; i++) //delete all actions and set them to NULL
 	{
 		if (actions[i] != NULL)
@@ -395,8 +374,6 @@ void ApplicationManager::clearall()
 	UnSelectFig();  // to delete selection for any figure 
 	actioncount = 0;                    //the actions beame zero
     FigCount=0;                         //the figures beame zero
-	number_undo = 0;
-	number_redo = 0;
 	pOut->ClearDrawArea();
 	pOut->PrintMessage("The clear all has been done");
 }
@@ -409,22 +386,7 @@ void ApplicationManager::displayAction()
 	}
 	else
 	{
-		for (int i = 0; i < number_undo; i++)
-		{
-			if (redo_undo_arr[i] != NULL)
-			{
-				//delete redo_undo_arr[i];
-				redo_undo_arr[i] = NULL;
-			}
-		}
-		for (int i = 0; i < number_redo; i++)
-		{
-			if (redo_arr[i] != NULL)
-			{
-				//delete redo_arr[i];
-				redo_arr[i] = NULL;
-			}
-		}
+		ClearUndoRedo();
 		for (int i = 0; i < FigCount; i++) //delete all figures and set them to NULL
 		{
 			if (FigList[i] != NULL)
@@ -435,8 +397,6 @@ void ApplicationManager::displayAction()
 		}
 		UnSelectFig();  // to delete selection for any figure 
 		FigCount = 0;                         //the figures beame zero
-		number_undo = 0;
-		number_redo = 0;
 		pOut->ClearDrawArea();
 		Sleep(1000);
 		for (int i = 0; i < actioncount; i++)    // display the actions recorded
@@ -471,29 +431,14 @@ bool ApplicationManager::ifselected() const
 	return false;
 }
 
-void ApplicationManager::ChngSelectedCLR(char c)
-{
-	if (c == 'F') SelectedFig->ChngFillClr(pOut->getCrntFillColor());
-	if (c == 'D')   SelectedFig->ChngDrawClr(pOut->getCrntDrawColor());
-}
 
 
 bool ApplicationManager::isanyfill()
-{  
-	bool x = false;
+{
 	for (int i = 0; i < FigCount; i++)
-	{
-		if (FigList[i] == NULL || FigList[i]->colourshape() == "WHITE")
-			x = false;
-		else
-		{
-			x = true;
-			return x;
-			break;
-		}
-		
-	}
-	return x;
+		if (FigList[i] != NULL && FigList[i]->colourshape() != "WHITE")
+			return true;
+	return false;
 }
 
 void ApplicationManager::setcheckvoice(const int x)
@@ -515,12 +460,6 @@ int ApplicationManager::getcheckvoice()
 	return checkvoice;
 }
 
-void ApplicationManager::setArryFig(int FigCount)//this function will use in icon play to save an copy of Fig in Array after kid play and switch to draw will use this Array
-{  
-	for (int i = 0; i < FigCount; i++)
-		if (FigList[i] != 0)
-			ArryFig[i] = FigList[i];
-}
 
 
  CFigure* ApplicationManager::getSelectedFigure() const
@@ -528,15 +467,6 @@ void ApplicationManager::setArryFig(int FigCount)//this function will use in ico
 	return   SelectedFig;
 }
 
- void ApplicationManager::MoveSelectedFig(Point P)
- {
-	 if (ifselected())
-	 {
-		 SelectedFig->MoveFig(P);
-	 }
-	 pOut->ClearDrawArea();
-	 UpdateInterface();
- }
 
  void ApplicationManager::setrecord(bool b)
  {
@@ -553,7 +483,7 @@ void ApplicationManager::setArryFig(int FigCount)//this function will use in ico
 	 if (number_undo >= 5)
 	 {
 		 //the oldest action leaves the undo list, free it unless it is still kept in the recorded actions
-		 if (!isrecorded() && !is_recorded_action(redo_undo_arr[0]))
+		 if (!is_recorded_action(redo_undo_arr[0]))
 		 {
 			 delete redo_undo_arr[0];
 		 }
@@ -584,6 +514,29 @@ void ApplicationManager::setArryFig(int FigCount)//this function will use in ico
 	 return false;
  }
 
+ void ApplicationManager::ClearRedo()
+ {
+	 for (int i = 0; i < number_redo; i++)
+	 {
+		 if (redo_arr[i] != NULL && !is_recorded_action(redo_arr[i]))
+			 delete redo_arr[i];
+		 redo_arr[i] = NULL;
+	 }
+	 number_redo = 0;
+ }
+
+ void ApplicationManager::ClearUndoRedo()
+ {
+	 for (int i = 0; i < number_undo; i++)
+	 {
+		 if (redo_undo_arr[i] != NULL && !is_recorded_action(redo_undo_arr[i]))
+			 delete redo_undo_arr[i];
+		 redo_undo_arr[i] = NULL;
+	 }
+	 number_undo = 0;
+	 ClearRedo();
+ }
+
  void ApplicationManager::decrease_undo_arr()
  {
 	 if (number_undo != 0)
@@ -611,15 +564,6 @@ void ApplicationManager::deleteSelectedFig()
 	pOut->ClearDrawArea();
 }
 
-CFigure* ApplicationManager::get_figure_with_id(int id)
-{
-	for (int i = 0; i < FigCount; i++)
-	{
-		if (FigList[i] != NULL && FigList[i]->get_id() == id)
-			return FigList[i];
-	}
-	return NULL;
-}
 
 void ApplicationManager::redo_display()
 {

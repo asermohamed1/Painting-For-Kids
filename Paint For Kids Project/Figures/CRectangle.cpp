@@ -4,8 +4,6 @@ CRectangle::CRectangle(Point P1, Point P2, GfxInfo FigureGfxInfo):CFigure(Figure
 {
 	Corner1 = P1;
 	Corner2 = P2;
-	center.x = (Corner1.x + Corner2.x) / 2.0;
-	center.y = (Corner1.y + Corner2.y) / 2.0;
 }
 CRectangle::CRectangle(GfxInfo FigureGfxInfo) :CFigure(FigureGfxInfo)
 {
@@ -20,31 +18,8 @@ void CRectangle::Draw(Output* pOut) const
 
 bool CRectangle::isThisFigure(Point p) const
 {
-	if (Corner1.y < Corner2.y&&Corner1.x<Corner2.x) {
-
-		if (p.y >= Corner1.y && p.y <= Corner2.y && p.x >= Corner1.x && p.x <= Corner2.x)
-			return true;
-		else return false;
-	}
-	else if (Corner1.y < Corner2.y && Corner1.x > Corner2.x) {
-
-		if (p.y >= Corner1.y && p.y <= Corner2.y && p.x <= Corner1.x && p.x >= Corner2.x)
-			return true;
-		else return false;
-
-	}
-	else if (Corner1.y > Corner2.y && Corner1.x < Corner2.x) {
-
-		if (p.y <= Corner1.y && p.y >= Corner2.y && p.x >= Corner1.x && p.x <= Corner2.x)
-			return true;
-		else return false;
-	}
-	else {
-
-		if (p.y >= Corner2.y && p.y <= Corner1.y && p.x >= Corner2.x && p.x <= Corner1.x)
-			return true;
-		else return false;
-	}
+	return p.x >= min(Corner1.x, Corner2.x) && p.x <= max(Corner1.x, Corner2.x)
+		&& p.y >= min(Corner1.y, Corner2.y) && p.y <= max(Corner1.y, Corner2.y);
 }
 
 void CRectangle::PrintInfo(Output* pOut) const
@@ -75,108 +50,25 @@ char CRectangle::keyshape()
 
 void CRectangle::MoveFig(Point P)
 {
-	Point center;
-	center.x = (Corner1.x + Corner2.x) / 2.0;
-	center.y = (Corner1.y + Corner2.y) / 2.0;
-	set_center(center);
-	//check if figure out of the drawing area
+	Point center = get_center();
+	//corner offsets from the center
+	int left = min(Corner1.x, Corner2.x) - center.x, right = max(Corner1.x, Corner2.x) - center.x;
+	int top = min(Corner1.y, Corner2.y) - center.y, bottom = max(Corner1.y, Corner2.y) - center.y;
 
-	if (Corner1.x > Corner2.x && Corner1.y < Corner2.y) {
+	//keep the rectangle inside the drawing area
+	if (P.x + right > UI.width - 15)       // UI.width-15 --> because of UI.Width is not enough
+		P.x = UI.width - 15 - right;
+	if (P.x + left < 0)
+		P.x = -left;
+	if (P.y + top < UI.ToolBarHeight)
+		P.y = UI.ToolBarHeight - top;
+	if (P.y + bottom > UI.height - UI.StatusBarHeight)
+		P.y = UI.height - UI.StatusBarHeight - bottom;
 
-		if (P.x + (Corner1.x - center.x) > UI.width - 15)       // UI.width-15 --> because of UI.Width is not enough
-		{
-			P.x = UI.width - 15 - (Corner1.x - center.x);
-		}
-		if (P.x - (Corner1.x - center.x) < 0)
-		{
-			P.x = (Corner1.x - center.x);
-		}
-		if (P.y - (Corner2.y - center.y) < UI.ToolBarHeight)
-		{
-			P.y = (Corner2.y - center.y) + UI.ToolBarHeight ;
-		}
-		if (P.y + (Corner2.y - center.y) > UI.height-UI.StatusBarHeight)
-		{
-			P.y = UI.height - UI.StatusBarHeight -(Corner2.y - center.y);
-		}
-		Corner1.x = P.x + (Corner1.x - center.x);
-		Corner1.y = P.y + (Corner1.y - center.y);
-		Corner2.x = P.x + (Corner2.x - center.x);
-		Corner2.y = P.y + (Corner2.y - center.y);
-
-	}
-	if (Corner1.x < Corner2.x && Corner1.y < Corner2.y) {
-
-		if (P.x + (Corner2.x - center.x) > UI.width - 15)
-		{
-			P.x = UI.width - 15 - (Corner2.x - center.x);
-		}
-		if (P.x - (Corner2.x - center.x) < 0)
-		{
-			P.x = (Corner2.x - center.x);
-		}
-		if (P.y - (Corner2.y - center.y) < UI.ToolBarHeight)
-		{
-			P.y = (Corner2.y - center.y) + UI.ToolBarHeight ;
-		}
-		if (P.y + (Corner2.y - center.y) > UI.height-UI.StatusBarHeight)
-		{
-			P.y = UI.height - UI.StatusBarHeight -(Corner2.y - center.y);
-		}
-		Corner1.x = P.x + (Corner1.x - center.x);
-		Corner1.y = P.y + (Corner1.y - center.y);
-		Corner2.x = P.x + (Corner2.x - center.x);
-		Corner2.y = P.y + (Corner2.y - center.y);
-
-	}
-	if (Corner1.x < Corner2.x && Corner1.y > Corner2.y) {
-
-		if (P.x + (Corner2.x - center.x) > UI.width - 15)
-		{
-			P.x = UI.width - 15 - (Corner2.x - center.x);
-		}
-		if (P.x - (Corner2.x - center.x) < 0)
-		{
-			P.x = (Corner2.x - center.x);
-		}
-		if (P.y - (Corner1.y - center.y) < UI.ToolBarHeight)
-		{
-			P.y = (Corner1.y - center.y) + UI.ToolBarHeight;
-		}
-		if (P.y + (Corner1.y - center.y) > UI.height - UI.StatusBarHeight)
-		{
-			P.y = UI.height - UI.StatusBarHeight - (Corner1.y - center.y);
-		}
-		Corner1.x = P.x + (Corner1.x - center.x);
-		Corner1.y = P.y + (Corner1.y - center.y);
-		Corner2.x = P.x + (Corner2.x - center.x);
-		Corner2.y = P.y + (Corner2.y - center.y);
-
-	}
-	if (Corner1.x > Corner2.x && Corner1.y > Corner2.y) {
-
-		if (P.x + (Corner1.x - center.x) > UI.width - 15)
-		{
-			P.x = UI.width - 15 - (Corner1.x - center.x);
-		}
-		if (P.x - (Corner1.x - center.x) < 0)
-		{
-			P.x = (Corner1.x - center.x);
-		}
-		if (P.y - (Corner1.y - center.y) < UI.ToolBarHeight)
-		{
-			P.y = (Corner1.y - center.y) + UI.ToolBarHeight;
-		}
-		if (P.y + (Corner1.y - center.y) > UI.height - UI.StatusBarHeight)
-		{
-			P.y = UI.height - UI.StatusBarHeight - (Corner1.y - center.y);
-		}
-		Corner1.x = P.x + (Corner1.x - center.x);
-		Corner1.y = P.y + (Corner1.y - center.y);
-		Corner2.x = P.x + (Corner2.x - center.x);
-		Corner2.y = P.y + (Corner2.y - center.y);
-
-	}
+	Corner1.x += P.x - center.x;
+	Corner1.y += P.y - center.y;
+	Corner2.x += P.x - center.x;
+	Corner2.y += P.y - center.y;
 }
 
 Point CRectangle::get_center()
@@ -187,10 +79,6 @@ Point CRectangle::get_center()
 	return c;
 }
 
-void CRectangle::set_center(Point P)
-{
-	center = P;
-}
 void CRectangle::save(ofstream& Outputfile)
 {
 	Outputfile << FigerName << " " << ID << " " << Corner1.x << " " << Corner1.y << " " << Corner2.x << " " << Corner2.y << " " << GetColor(FigGfxInfo.DrawClr) << " " << GetColor(FigGfxInfo.FillClr) << " " << FigGfxInfo.isFilled << endl;

@@ -324,8 +324,10 @@ window::~window() {
 inline void window::ProcessMessage() {
 
     MSG msgStruct;
-	
-    if(PeekMessage(&msgStruct, hwndWindow, 0, 0, PM_REMOVE)) {
+
+    // Handle every pending message of this thread (not only the ones of this
+    // window), so the waiting functions below can sleep until new input arrives
+    while(PeekMessage(&msgStruct, NULL, 0, 0, PM_REMOVE)) {
 	    TranslateMessage(&msgStruct);
 		DispatchMessage(&msgStruct);
 	}
@@ -556,6 +558,10 @@ clicktype window::WaitMouseClick(int &iX, int &iY) {
 		    delete mqueTmp;
 		    return ctTmp;
 		}
+
+		// Nothing yet: sleep until the next window message arrives instead of
+		// spinning (the old busy loop kept one CPU core at 100% while idle)
+		MsgWaitForMultipleObjectsEx(0, NULL, 100, QS_ALLINPUT, MWMO_INPUTAVAILABLE);
 	}
 }
 
@@ -575,6 +581,9 @@ keytype window::WaitKeyPress(char &cKey) {
     		delete kqueTmp;
 	    	return ktTmp;
 		}
+
+		// Nothing yet: sleep until the next window message arrives instead of spinning
+		MsgWaitForMultipleObjectsEx(0, NULL, 100, QS_ALLINPUT, MWMO_INPUTAVAILABLE);
 	}
 }
 

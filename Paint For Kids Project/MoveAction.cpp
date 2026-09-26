@@ -69,29 +69,38 @@ void MoveAction::Execute()
 			undo_center = fig->get_center();   //the position before moving (for undo)
 			while (i == 0)
 			{
-				bool f = pOut->GetMouseState(); //Check if the user click on the mouse or not
 				Point p2 = pOut->GetMouseCoord(); //Get the coordinates of the mouse just after the press on the mouse
 				//check if the mouse is pressed & the first click was on the figure
 				if (pManager->GetFigure(p2) == pManager->getSelectedFigure() && pOut->GetMouseState())
 				{
+					//draw every frame on an off-screen buffer, then show it at once (no flicker)
+					pOut->StartBuffering();
+					pOut->PrintMessage("Move by Dragging....release the mouse to drop the figure");
+					Point last = { -1, -1 };
 					do
 					{
 						do
 						{
-
-							//Make the figure follow the mouse while the noused is pressed
+							//Make the figure follow the mouse while the mouse is pressed
 							P = pOut->GetMouseCoord();
-							pManager->getSelectedFigure()->MoveFig(P);
-							pManager->UpdateInterface();
+							if (P.x != last.x || P.y != last.y) //redraw only when the mouse moved
+							{
+								fig->MoveFig(P);
+								pOut->ClearDrawArea();
+								pManager->UpdateInterface();
+								pOut->FlushBuffer();
+								last = P;
+							}
 							Sleep(10);
-							pOut->ClearDrawArea();
 						} while (pOut->GetMouseState());
 					} while (!isvalid(P));
+					pOut->StopBuffering();
 					i = 1;
 				}
 				else if (pManager->GetFigure(p2) != pManager->getSelectedFigure() && pOut->GetMouseState())
 				{
 					i = 1;
+					type = non; //the figure was not dragged
 					pOut->ClearDrawArea();
 					pManager->UpdateInterface();
 				}
@@ -113,9 +122,8 @@ void MoveAction::Execute()
 
 void MoveAction::Execure_recording_actions()
 {
-	if (pManager->getSelectedFigure() != NULL)
+	if (pManager->getSelectedFigure() != NULL && type != non) //nothing to replay if the figure was not moved
 	{
-	
 		Output* pOut = pManager->GetOutput();
 		fig = pManager->getSelectedFigure();
 		undo_center = fig->get_center();
@@ -133,13 +141,13 @@ CFigure* MoveAction::get_figure()
 
 void MoveAction::undo()
 {
-	if (fig != NULL) //nothing to undo if the figure was not moved
+	if (fig != NULL && type != non) //nothing to undo if the figure was not moved
 		fig->MoveFig(undo_center);
 }
 
 void MoveAction::redo()
 {
-	if (fig != NULL)
+	if (fig != NULL && type != non)
 		fig->MoveFig(P);
 }
 

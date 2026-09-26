@@ -9,7 +9,6 @@ protected:
 	int CountT;
 	int CountF;
 	ActionType check;
-	int random_number;
 	int counter;//count number of given radom shape that generate
 	bool pick;// control if i take this shape or it had been taken before
 public:

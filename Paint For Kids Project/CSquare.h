@@ -4,7 +4,6 @@ class CSquare : public CFigure
 {
 private :
 	Point Center;
-	Point center_undo;
 	string FigerName = "SQUARE";
 public:
 	CSquare(Point, GfxInfo FigureGfxInfo);
@@ -15,7 +14,6 @@ public:
 	char keyshape();
 	virtual	void MoveFig(Point P); // Move the square to another point
 	virtual Point get_center();
-	virtual void set_center(Point P);
 	virtual void save(ofstream& Outputfile);
 	virtual void Load(ifstream& infile);
 };

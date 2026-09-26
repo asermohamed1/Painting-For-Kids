@@ -1,11 +1,9 @@
 #include "ShapeColourAction.h"
 #include"ApplicationManager.h"
-#include <random>
 ShapeColourAction::ShapeColourAction(ApplicationManager* p) :Action(p)
 {
     CountF = 0;
     CountT = 0;
-    random_number = 0;
     counter = 0;
 }
 
@@ -35,15 +33,9 @@ void ShapeColourAction::Execute()
     }
     else
     {
-        do
-        {
-            random_device rd;
-            mt19937 gen(rd());
-            uniform_int_distribution<> distribution(0, (pManager->GetFigCount() - 1));
-            random_number = distribution(gen);
-        } while (pManager->Getshape(random_number) == 0 || (pManager->Getshape(random_number)->colourshape() == "WHITE"));
-        keyShape = pManager->Getshape(random_number)->keyshape();
-        Colour = (pManager->Getshape(random_number))->colourshape();
+        CFigure* target = pManager->GetRandomFigure(true); //the kid picks all figures of this type and colour
+        keyShape = target->keyshape();
+        Colour = target->colourshape();
         switch (keyShape)
         {
         case '!':

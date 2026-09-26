@@ -7,7 +7,6 @@ CCircle::CCircle(Point P1, Point P2, GfxInfo FigureGfxInfo) :CFigure(FigureGfxIn
 {
 	Center = P1;
 	point = P2;
-	center_undo = Center;
 }
 
 
@@ -19,12 +18,10 @@ void CCircle::Draw(Output* pOut) const
 
 bool CCircle::isThisFigure(Point p) const
 {
-	float radius=  sqrt((Center.x - point.x) * (Center.x - point.x) + (Center.y - point.y) * (Center.y - point.y));
-	float d= sqrt((Center.x - p.x) * (Center.x - p.x) + (Center.y - p.y) * (Center.y - p.y));
-
-	if (d<=radius)
-		return true;
-	else return false;
+	//compare squared distances (no sqrt needed)
+	int radius2 = (Center.x - point.x) * (Center.x - point.x) + (Center.y - point.y) * (Center.y - point.y);
+	int d2 = (Center.x - p.x) * (Center.x - p.x) + (Center.y - p.y) * (Center.y - p.y);
+	return d2 <= radius2;
 }
 
 void CCircle::PrintInfo(Output* pOut) const
@@ -47,7 +44,6 @@ char CCircle::keyshape()
 
 void CCircle::MoveFig(Point P)
 {
-	set_center(Center);
 	float  radius = sqrt((Center.x - point.x) * (Center.x - point.x) + (Center.y - point.y) * (Center.y - point.y));
 	
 	//check if figure is out of the drawing area
@@ -80,10 +76,6 @@ Point CCircle::get_center()
 	return Center;
 }
 
-void CCircle::set_center(Point P)
-{
-	center_undo = P;
-}
 void CCircle::save(ofstream& Outputfile)
 {
 	Outputfile << FigerName << " " << ID << " " << Center.x << " " << Center.y << " " << point.x << " " << point.y << " " << GetColor(FigGfxInfo.DrawClr) << " " << GetColor(FigGfxInfo.FillClr) << " " << FigGfxInfo.isFilled << endl;

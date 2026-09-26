@@ -20,7 +20,6 @@ private:
 	
 	int number_redo;
 	CFigure* FigList[MaxFigCount];	//List of all figures (Array of pointers)
-	CFigure* ArryFig[MaxFigCount];
 	CFigure* SelectedFig; //Pointer to the selected figure
 	bool record;
 	bool exitRequested; //set by the exit action to end the main loop
@@ -42,17 +41,15 @@ public:
 	// -- Figures Management Functions
 	void AddFigure(CFigure* pFig);          //Adds a new figure to the FigList
 	CFigure *GetFigure(Point p) const; //Search for a figure given a point inside the figure
-	bool CheckSelection(Point p) const;     //Check the figure is selected or not
 	void SetSelectedFig(Point p);     // set the figure to be selected
 	void UnSelectFig();               // unselect figure
 	void PrintSelectedInfo() const;         // print message of the  selected figure
 	int GetFigCount();   //Get  FigCount to set ID of the Figures
-	CFigure* Getshape(int);     // -- Interface Management Functions
+	CFigure* GetRandomFigure(bool filledOnly); //random figure for the play mode games (NULL if none)
 	Input *GetInput() const; //Return pointer to the input
 	Output *GetOutput() const; //Return pointer to the output
 	void UpdateInterface() const;	//Redraws all the drawing window	
 	void deleteSelectedFig();   //delete the selected figure
-	int GetNUMfig(Point);
 	int numgivenkeyshape(char);
 	int numsamecolour(string);
 	int numsamecolourshape(char, string);
@@ -61,19 +58,17 @@ public:
 	void clearall();              // clear all history and figures
 	void displayAction();         // play last record
 	bool ifselected() const;
-	void ChngSelectedCLR(char);// Update the Fill & Drawing color of the selected figure
 	bool isanyfill();
 	void setcheckvoice(const int);
 	int getcheckvoice();
-	void setArryFig(int);
 	CFigure* getSelectedFigure() const; // Get Pointer to the selected figure
-	void MoveSelectedFig(Point P); //move the selected figure
 	void setrecord(bool);   //set start or end record
 	bool isrecorded();      //check record
 	void add_action(Action*); //add action to undo array
 	bool is_recorded_action(Action*) const; //check if the action is kept in the recorded actions list
+	void ClearRedo();        //empty the redo list and free its actions
+	void ClearUndoRedo();    //empty the undo and redo lists and free their actions
 	void decrease_undo_arr(); //display undo
-	CFigure* get_figure_with_id(int); 
 	void redo_display(); //redo display
 	void delete_fig(CFigure* fig); //remove figure from the list (does not free it)
 	bool check_valid_recording();

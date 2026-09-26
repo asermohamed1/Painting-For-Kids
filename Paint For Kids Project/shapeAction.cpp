@@ -1,12 +1,10 @@
 #include "ApplicationManager.h"
 #include"shapeAction.h"
-#include <random>//for generate random number
 #include<cmath>//this for func sleep
 shapeAction::shapeAction(ApplicationManager* p) :Action(p)
 {
     CountF = 0;
     CountT = 0;
-    random_number = 0;
     counter = 0;
 }
 
@@ -34,14 +32,8 @@ void shapeAction::Execute()
     else
     {
 
-        do
-        {
-            random_device rd;
-            mt19937 gen(rd());
-            uniform_int_distribution<> distribution(0, (pManager->GetFigCount() - 1));
-            random_number = distribution(gen);
-        } while (pManager->Getshape(random_number) == 0);
-        keyShape = pManager->Getshape(random_number)->keyshape();
+        CFigure* target = pManager->GetRandomFigure(false); //the kid picks all figures of this type
+        keyShape = target->keyshape();
         switch (keyShape)
         {
         case '!':

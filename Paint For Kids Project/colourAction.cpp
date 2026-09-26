@@ -1,6 +1,5 @@
 #include "colourAction.h"
 #include "ApplicationManager.h"
-#include <random>
 #include<cmath>
 #include<cstring>
 colourAction::colourAction(ApplicationManager* p) :Action(p)
@@ -8,7 +7,6 @@ colourAction::colourAction(ApplicationManager* p) :Action(p)
     CountF = 0;
     CountT = 0;
     counter = 0;
-    random_number = 0;
 
 }
 
@@ -41,15 +39,8 @@ void colourAction::Execute()
 
     else
     {
-        random_number = 0;
-        do
-        {
-            random_device rd;
-            mt19937 gen(rd());
-            uniform_int_distribution<> distribution(0, (pManager->GetFigCount() - 1));
-            random_number = distribution(gen);
-        } while ((pManager->Getshape(random_number)) == 0 || (pManager->Getshape(random_number)->colourshape() == "WHITE"));
-        Colour = (pManager->Getshape(random_number))->colourshape();
+        CFigure* target = pManager->GetRandomFigure(true); //the kid picks all figures of this colour
+        Colour = target->colourshape();
         pOut->PrintMessage("PICK ALL " + Colour + " SHAPES");
         counter = (pManager->numsamecolour(Colour));
         while (true)

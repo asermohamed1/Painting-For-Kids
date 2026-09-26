@@ -16,6 +16,7 @@ protected:
 	bool x;//to check if shape is hidden or not
 public:
 	CFigure(GfxInfo FigureGfxInfo);
+	virtual ~CFigure() {}	//virtual so deleting through a CFigure* frees the derived members
 	void setID(int ID);
 	void setgfxinfo(GfxInfo GI);
 	void SetSelected(bool s);	//select/unselect the figure
@@ -40,8 +41,7 @@ public:
 	virtual color return_fill_color();
 	virtual void null_fill_color();
 	virtual color return_draw_color();
-	virtual Point get_center() = 0;
-	virtual void set_center(Point P) = 0;
+	virtual Point get_center() = 0;	//current center of the figure
 	virtual void save(ofstream& Outputfile) = 0;
 	virtual void Load(ifstream& infile) = 0;
 	static string GetColor(color c);

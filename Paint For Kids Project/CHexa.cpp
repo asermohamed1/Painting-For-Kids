@@ -7,7 +7,6 @@ CHexa::CHexa(GfxInfo FigureGfxInfo) :CFigure(FigureGfxInfo)
 CHexa::CHexa(Point center, GfxInfo FigureGfxInfo): CFigure(FigureGfxInfo)
 {
 	Center = center;
-	center_undo = center;
 }
 
 void CHexa::Draw(Output* pOut) const
@@ -23,18 +22,13 @@ bool CHexa::isThisFigure(Point p) const
     double dX = abs(p.x - Center.x);
     double dY = abs(p.y - Center.y);
 
-    // Calculate the maximum distance from the center to the hexagon's side
-    double maxXD = 100;
-    double maxYD = 100* sqrt(3) / 2;
+    // Maximum distance from the center to the hexagon's side (side length 100)
+    const double maxXD = 100;
+    const double maxYD = 86.602540378443865;    // 100 * sqrt(3) / 2
+    const double slope = 0.57735026918962576;   // sqrt(3) / 3
 
     // Check if the point is within the hexagon bounds
-    if (dX <= maxXD) {
-        if (dY <= maxYD) {
-          if(dX<=100-(sqrt(3.0)/3.0)*dY)
-                return true;
-        }
-    }
-    return false;
+    return dX <= maxXD && dY <= maxYD && dX <= maxXD - slope * dY;
 }
 
 void CHexa::PrintInfo(Output* pOut) const
@@ -57,7 +51,6 @@ char CHexa::keyshape()
 void CHexa::MoveFig(Point P)
 {
 	//check if figure is out of the drawing area
-	set_center(Center);
 	if (P.x + 100 > UI.width - 15)       // UI.width-15 --> because of UI.Width is not enough
 	{
 		P.x = UI.width - 15 - 100;
@@ -82,10 +75,6 @@ Point CHexa::get_center()
 	return Center;
 }
 
-void CHexa::set_center(Point P)
-{
-	center_undo = P;
-}
 
 void CHexa::save(ofstream& Outputfile)
 {

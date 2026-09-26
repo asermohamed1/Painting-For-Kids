@@ -58,6 +58,8 @@ bool CFigure::ishidden()
 void CFigure::setID(int ID)
 {
 	this->ID = ID;
+	if (ID >= id)	//new figures must not reuse the ID of a loaded figure
+		id = ID + 1;
 }
 void CFigure::setgfxinfo(GfxInfo GI)
 {

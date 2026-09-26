@@ -8,7 +8,6 @@ class CRectangle : public CFigure
 private:
 	Point Corner1;	
 	Point Corner2;
-	Point center;
 	string FigerName = "RECT";
 public:
 	CRectangle(Point , Point, GfxInfo FigureGfxInfo );
@@ -19,7 +18,6 @@ public:
 	char keyshape();
 	virtual	void MoveFig(Point P); // Move the rectangle to another point
 	virtual Point get_center();
-	virtual void set_center(Point P);
 	virtual void save(ofstream& Outputfile);
 	virtual void Load(ifstream& infile);
 };

@@ -21,7 +21,7 @@ void SaveAction::Execute()
 		return;
 	}
 	//read the current draw color and fill color
-	Outputfile << pManager->GetOutput()->GetColor(pManager->GetOutput()->getCrntDrawColor()) << " " << pManager->GetOutput()->GetColor(pManager->GetOutput()->getCrntFillColor()) << endl;
+	Outputfile << CFigure::GetColor(pManager->GetOutput()->getCrntDrawColor()) << " " << CFigure::GetColor(pManager->GetOutput()->getCrntFillColor()) << endl;
 
 	Outputfile << pManager->GetFigCount() << endl;//read number of figures
 	pManager->SaveAll(Outputfile);

@@ -15,6 +15,7 @@ public:
 
 	Action(ApplicationManager* pApp) :pManager(pApp)
 	{}	//constructor
+	virtual ~Action() {}	//virtual so deleting through an Action* frees the derived members
 
 	//Reads parameters required for action to execute (code depends on action type)
 	virtual void ReadActionParameters() =0;

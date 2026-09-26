@@ -10,7 +10,6 @@ protected:
 	int CountT;//count true picks
 	int CountF;//count false picks
 	ActionType check;//check if i break from loop or continue
-	int random_number;//use to generate random number
 	int counter;//count number of given random colour that generate
 	bool pick;// control if i take this shape or it had been taken before
 	char keyShape;

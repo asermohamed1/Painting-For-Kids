@@ -6,9 +6,6 @@ CTriangle::CTriangle(GfxInfo FigureGfxInfo) :CFigure(FigureGfxInfo)
 CTriangle::CTriangle(Point P1, Point P2,Point P3, GfxInfo FigureGfxInfo) : CFigure(FigureGfxInfo)
 {
 	Corner1 = P1;	Corner2 = P2;	Corner3 = P3;
-	numtriangles++;
-	center_undo.x = (Corner1.x + Corner2.x + Corner3.x) / 3.0;
-	center_undo.y = (Corner1.y + Corner2.y + Corner3.y) / 3.0;
 }
 
 void CTriangle::Draw(Output* pOut) const
@@ -20,12 +17,13 @@ void CTriangle::Draw(Output* pOut) const
 
 bool CTriangle::isThisFigure(Point p) const
 {
-	float A  = abs(Corner1.x*(Corner2.y-Corner3.y)+Corner2.x*(Corner3.y-Corner1.y)+Corner3.x*(Corner1.y-Corner2.y))/2.0;  //Area of all triangle
-	float A1 = abs(p.x * (Corner1.y - Corner2.y) + Corner1.x * (Corner2.y - p.y) + Corner2.x * (p.y - Corner1.y)) / 2.0;  //Area of the first small triangle
-	float A2 = abs(p.x * (Corner2.y - Corner3.y) + Corner2.x * (Corner3.y - p.y) + Corner3.x * (p.y - Corner2.y)) / 2.0;  //Area of the second small triangle
-	float A3 = abs(p.x * (Corner3.y - Corner1.y) + Corner3.x * (Corner1.y - p.y) + Corner1.x * (p.y - Corner3.y)) / 2.0;  //Area of the third small triangle
-	if (A == A1 + A2 + A3) return true; //check is the sum of small areaa = the big area or not
-	else return false;
+	//twice the signed area of each small triangle (exact integer math, no float comparison)
+	long long d1 = (long long)(p.x - Corner2.x) * (Corner1.y - Corner2.y) - (long long)(Corner1.x - Corner2.x) * (p.y - Corner2.y);
+	long long d2 = (long long)(p.x - Corner3.x) * (Corner2.y - Corner3.y) - (long long)(Corner2.x - Corner3.x) * (p.y - Corner3.y);
+	long long d3 = (long long)(p.x - Corner1.x) * (Corner3.y - Corner1.y) - (long long)(Corner3.x - Corner1.x) * (p.y - Corner1.y);
+	bool hasNeg = d1 < 0 || d2 < 0 || d3 < 0;
+	bool hasPos = d1 > 0 || d2 > 0 || d3 > 0;
+	return !(hasNeg && hasPos);	//inside or on the border when all have the same sign
 }
 
 void CTriangle::PrintInfo(Output* pOut) const
@@ -44,116 +42,29 @@ char CTriangle::keyshape()
 {
 	return '*';
 }
-int CTriangle::numtriangles = 0;
-
-
-int CTriangle::getnumshapes()
-{
-	return numtriangles;
-}
 
 void CTriangle::MoveFig(Point P)
 {
-	//check if figure out of the drawing area
+	Point center = get_center();
+	//corner offsets from the center
+	int left = min(min(Corner1.x, Corner2.x), Corner3.x) - center.x;
+	int right = max(max(Corner1.x, Corner2.x), Corner3.x) - center.x;
+	int top = min(min(Corner1.y, Corner2.y), Corner3.y) - center.y;
+	int bottom = max(max(Corner1.y, Corner2.y), Corner3.y) - center.y;
 
-	Point Center;
-	Center.x = (Corner1.x + Corner2.x + Corner3.x) / 3.0;
-	Center.y = (Corner1.y + Corner2.y + Corner3.y) / 3.0;
-	set_center(Center);
-	Corner1.x += (P.x - Center.x);
-	Corner2.x += (P.x - Center.x);
-	Corner3.x += (P.x - Center.x);
-	Corner1.y += (P.y - Center.y);
-	Corner2.y += (P.y - Center.y);
-	Corner3.y += (P.y - Center.y);
-	Center = P;
-	if (Corner1.x > UI.width - 15) {
-		P.x = P.x - (Corner1.x - (UI.width - 15));
-		Corner1.x += (P.x - Center.x);
-		Corner2.x += (P.x - Center.x);
-		Corner3.x += (P.x - Center.x);
-		Center = P;
-	}
-	if (Corner1.x <0) {
-		P.x = P.x + (-Corner1.x);
-		Corner1.x += (P.x - Center.x);
-		Corner2.x += (P.x - Center.x);
-		Corner3.x += (P.x - Center.x);
-		Center = P;
-	}
-	if (Corner2.x > UI.width - 15) {
-		P.x = P.x - (Corner2.x - (UI.width - 15));
-		Corner1.x += (P.x - Center.x);
-		Corner2.x += (P.x - Center.x);
-		Corner3.x += (P.x - Center.x);
-		Center = P;
-	}
-	if (Corner2.x <0) {
-		P.x = P.x + (-Corner2.x);
-		Corner1.x += (P.x - Center.x);
-		Corner2.x += (P.x - Center.x);
-		Corner3.x += (P.x - Center.x);
-		Center = P;
-	}
-	if (Corner3.x > UI.width - 15) {
-		P.x = P.x - (Corner3.x - (UI.width - 15));
-		Corner1.x += (P.x - Center.x);
-		Corner2.x += (P.x - Center.x);
-		Corner3.x += (P.x - Center.x);
-		Center = P;
-	}
-	if (Corner3.x <0) {
-		P.x = P.x + (-Corner3.x);
-		Corner1.x += (P.x - Center.x);
-		Corner2.x += (P.x - Center.x);
-		Corner3.x += (P.x - Center.x);
-		Center = P;
-	}
-	if (Corner1.y < UI.ToolBarHeight) {
-		P.y = P.y + ( UI.ToolBarHeight- Corner1.y );
-		Corner1.y += (P.y - Center.y);
-		Corner2.y += (P.y - Center.y);
-		Corner3.y += (P.y - Center.y);
-		Center = P;
-	}
-	if (Corner1.y > UI.height-UI.StatusBarHeight) {
-		P.y = P.y - (Corner1.y -( UI.height - UI.StatusBarHeight-2));
-		Corner1.y += (P.y - Center.y);
-		Corner2.y += (P.y - Center.y);
-		Corner3.y += (P.y - Center.y);
-		Center = P;
-	}if (Corner2.y < UI.ToolBarHeight) {
-		P.y = P.y + (UI.ToolBarHeight - Corner2.y);
-		Corner1.y += (P.y - Center.y);
-		Corner2.y += (P.y - Center.y);
-		Corner3.y += (P.y - Center.y);
-		Center = P;
-	}
-	if (Corner2.y > UI.height - UI.StatusBarHeight) {
-		P.y = P.y - (Corner2.y - (UI.height - UI.StatusBarHeight-2));
-		Corner1.y += (P.y - Center.y);
-		Corner2.y += (P.y - Center.y);
-		Corner3.y += (P.y - Center.y);
-		Center = P;
-	}
-	if (Corner3.y < UI.ToolBarHeight) {
-		P.y = P.y + (UI.ToolBarHeight - Corner3.y);
-		Corner1.y += (P.y - Center.y);
-		Corner2.y += (P.y - Center.y);
-		Corner3.y += (P.y - Center.y);
-		Center = P;
-	}
-	if (Corner3.y > UI.height - UI.StatusBarHeight) {
-		P.y = P.y - (Corner3.y - (UI.height - UI.StatusBarHeight-2));
-		Corner1.y += (P.y - Center.y);
-		Corner2.y += (P.y - Center.y);
-		Corner3.y += (P.y - Center.y);
-		Center = P;
-	}
+	//keep the triangle inside the drawing area
+	if (P.x + right > UI.width - 15)
+		P.x = UI.width - 15 - right;
+	if (P.x + left < 0)
+		P.x = -left;
+	if (P.y + top < UI.ToolBarHeight)
+		P.y = UI.ToolBarHeight - top;
+	if (P.y + bottom > UI.height - UI.StatusBarHeight)
+		P.y = UI.height - UI.StatusBarHeight - 2 - bottom;
 
-
-
-
+	int dx = P.x - center.x, dy = P.y - center.y;
+	Corner1.x += dx;	Corner2.x += dx;	Corner3.x += dx;
+	Corner1.y += dy;	Corner2.y += dy;	Corner3.y += dy;
 }
 
 Point CTriangle::get_center()
@@ -164,10 +75,6 @@ Point CTriangle::get_center()
 	return c;
 }
 
-void CTriangle::set_center(Point P)
-{
-	center_undo = P;
-}
 void CTriangle::save(ofstream& Outputfile)
 {
 	Outputfile << FigerName << " " << ID << " " << Corner1.x << " " << Corner1.y << " " << Corner2.x << " " << Corner2.y << " " << Corner3.x << " " << Corner3.y << " " << GetColor(FigGfxInfo.DrawClr) << " " << GetColor(FigGfxInfo.FillClr) << " " << FigGfxInfo.isFilled << endl;

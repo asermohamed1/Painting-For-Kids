@@ -34,36 +34,26 @@ void loadaction::Execute()
 		fill = !(UI.FillColor == WHITE);
 		for (int i = 0; i < num && (InputFile >> figname); i++)
 		{
+			CFigure* c = NULL;
 			if (figname == "HEXAGON")
-			{
-				CFigure* c = new CHexa(gfxinfo);
-				c->Load(InputFile);
-				pManager->AddFigure(c);
-			}
+				c = new CHexa(gfxinfo);
 			else if (figname == "RECT")
-			{
-				CFigure* c = new CRectangle(gfxinfo);
-				c->Load(InputFile);
-				pManager->AddFigure(c);
-			}
+				c = new CRectangle(gfxinfo);
 			else if (figname == "SQUARE")
-			{
-				CFigure* c = new CSquare(gfxinfo);
-				c->Load(InputFile);
-				pManager->AddFigure(c);
-			}
+				c = new CSquare(gfxinfo);
 			else if (figname == "TRIANG")
-			{
-				CFigure* c = new CTriangle(gfxinfo);
-				c->Load(InputFile);
-				pManager->AddFigure(c);
-			}
+				c = new CTriangle(gfxinfo);
 			else if (figname == "CIRCLE")
+				c = new CCircle(gfxinfo);
+			if (c == NULL) //unknown figure name: the file is damaged
+				break;
+			c->Load(InputFile);
+			if (InputFile.fail()) //missing or wrong numbers: the file is damaged
 			{
-				CFigure* c = new CCircle(gfxinfo);
-				c->Load(InputFile);
-				pManager->AddFigure(c);
+				delete c;
+				break;
 			}
+			pManager->AddFigure(c);
 
 		}
 	}

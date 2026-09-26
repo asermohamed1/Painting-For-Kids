@@ -3,6 +3,8 @@
 
 Output::Output()
 {
+	DrawImagesLoaded = PlayImagesLoaded = MoveImagesLoaded = false;
+
 	//Initialize user interface parameters
 	UI.InterfaceMode = MODE_DRAW;
 
@@ -79,6 +81,8 @@ void Output::CreateDrawToolBar() const
 	//First prepare List of images for each menu item
 	//To control the order of these images in the menu, 
 	//reoder them in UI_Info.h ==> enum DrawMenuItem
+	if (!DrawImagesLoaded)
+	{
 	string MenuItemImages[DRAW_ITM_COUNT];
 	MenuItemImages[ITM_SELECT] = "images\\MenuItems\\SELECT.jpg";
 	MenuItemImages[ITM_TRI] = "images\\MenuItems\\TRI.jpg";
@@ -109,14 +113,14 @@ void Output::CreateDrawToolBar() const
 	MenuItemImages[ITM_DELETE] = "images\\MenuItems\\delete.jpg";
 	MenuItemImages[ITM_EXIT] = "images\\MenuItems\\Menu_Exit.jpg";
 
+	for (int i = 0; i < DRAW_ITM_COUNT; i++)
+		DrawMenuImages[i].Open(MenuItemImages[i]);
+	DrawImagesLoaded = true;
+	}
 
-
-
-	//TODO: Prepare images for each menu item and add it to the list
-	// 
 	//Draw menu item one image at a time
 	for (int i = 0; i < DRAW_ITM_COUNT; i++)
-		pWind->DrawImage(MenuItemImages[i], i * UI.MenuItemWidth, 0, UI.MenuItemWidth, UI.ToolBarHeight);
+		pWind->DrawImage(DrawMenuImages[i], i * UI.MenuItemWidth, 0, UI.MenuItemWidth, UI.ToolBarHeight);
 
 
 
@@ -130,6 +134,8 @@ void Output::CreateDrawToolBar() const
 void Output::CreatePlayToolBar() const
 {
 	UI.InterfaceMode = MODE_PLAY;
+	if (!PlayImagesLoaded)
+	{
 	string MenuItemImages[PLAY_ITM_COUNT];
 	MenuItemImages[PLAY_ITM_COLOUR] = "images\\MenuItems\\colour.jpg";
 	MenuItemImages[PLAY_ITM_SHAPE] = "images\\MenuItems\\shape.jpg";
@@ -138,14 +144,13 @@ void Output::CreatePlayToolBar() const
 	MenuItemImages[PLAY_ITM_restart] = "images\\MenuItems\\restart.jpg";
 	MenuItemImages[PLAY_ITM_EXIT] = "images\\MenuItems\\Menu_Exit.jpg";
 
-
-
-
-
-
+	for (int i = 0; i < PLAY_ITM_COUNT; i++)
+		PlayMenuImages[i].Open(MenuItemImages[i]);
+	PlayImagesLoaded = true;
+	}
 
 	for (int i = 0; i < PLAY_ITM_COUNT; i++)
-		pWind->DrawImage(MenuItemImages[i], i * (UI.MenuItemWidth), 0, (UI.MenuItemWidth), UI.ToolBarHeight);//YOU USE HERE UI.WIDTH+7 TAKE CARE
+		pWind->DrawImage(PlayMenuImages[i], i * (UI.MenuItemWidth), 0, (UI.MenuItemWidth), UI.ToolBarHeight);
 
 
 
@@ -165,8 +170,14 @@ void Output::CreateMoveToolBar() const
 	//Draw the images of Move Type 
 	UI.InterfaceMode= MODE_DRAW;
 	
-	pWind->DrawImage("images\\MenuItems\\moveToolBar.jpg", (ITM_MOVE -.5)* UI.MenuItemWidth, UI.ToolBarHeight , UI.MenuItemWidth, UI.MenuItemWidth); //Draw the image of move by click
-	pWind->DrawImage("images\\MenuItems\\move by drag.jpg", (ITM_MOVE + .5) * UI.MenuItemWidth, UI.ToolBarHeight, UI.MenuItemWidth, UI.MenuItemWidth); //Draw the image of move by Dragging
+	if (!MoveImagesLoaded)
+	{
+		MoveMenuImages[0].Open("images\\MenuItems\\moveToolBar.jpg");
+		MoveMenuImages[1].Open("images\\MenuItems\\move by drag.jpg");
+		MoveImagesLoaded = true;
+	}
+	pWind->DrawImage(MoveMenuImages[0], (int)((ITM_MOVE - .5) * UI.MenuItemWidth), UI.ToolBarHeight, UI.MenuItemWidth, UI.MenuItemWidth); //Draw the image of move by click
+	pWind->DrawImage(MoveMenuImages[1], (int)((ITM_MOVE + .5) * UI.MenuItemWidth), UI.ToolBarHeight, UI.MenuItemWidth, UI.MenuItemWidth); //Draw the image of move by Dragging
 	
 }
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -178,6 +189,28 @@ void Output::ClearDrawArea() const
 	pWind->DrawRectangle(0, UI.ToolBarHeight, UI.width, UI.height - UI.StatusBarHeight);
 
 }
+void Output::StartBuffering() const
+{
+	//The buffer starts empty, so draw the toolbar and the status bar on it first
+	pWind->SetBuffering(true);
+	if (UI.InterfaceMode == MODE_DRAW)
+		CreateDrawToolBar();
+	else
+		CreatePlayToolBar();
+	CreateStatusBar();
+}
+
+void Output::FlushBuffer() const
+{
+	pWind->UpdateBuffer();
+}
+
+void Output::StopBuffering() const
+{
+	pWind->UpdateBuffer();
+	pWind->SetBuffering(false);
+}
+
 void Output::Cleartoolbar() const
 {
 	pWind->SetPen(UI.BkGrndColor, 1);
@@ -186,26 +219,6 @@ void Output::Cleartoolbar() const
 
 }
 //////////////////////////////////////////////////////////////////////////////////////////
-
-string Output::GetColor(color c)
-{
-	if (c == RED)
-		return "RED";
-	else if (c == BLACK)
-		return "BLACK";
-	else if (c == ORANGE)
-		return "ORANGE";
-	else if (c == GREEN)
-		return "GREEN";
-	else if (c == YELLOW)
-		return "YELLOW";
-	else if (c == BLUE)
-		return"BLUE";
-	else if (c == WHITE)
-		return "WHITE";
-	else
-		return "NO_COLOR";
-}
 
 void Output::PrintMessage(string msg) const	//Prints a message on status bar
 {

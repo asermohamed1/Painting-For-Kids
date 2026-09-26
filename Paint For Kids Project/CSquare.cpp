@@ -6,7 +6,6 @@ CSquare::CSquare(Point center, GfxInfo FigureGfxInfo) : CFigure(FigureGfxInfo)
 {
 	
 	Center = center;
-	center_undo = center;
 }
 void CSquare::Draw(Output* pOut) const
 {
@@ -27,7 +26,7 @@ void CSquare::PrintInfo(Output* pOut) const
 	if (Color == "WHITE")
 		Color = "Non filled";
 	string s = "selected Figure Info-->      Type: Square         ID: " + to_string(ID) + "   Center: (" + to_string(Center.x) + "," + to_string(Center.y) + ")     Length:"
-		+ to_string(100)+"   Color: "+Color;
+		+ to_string(200)+"   Color: "+Color;
 	pOut->PrintMessage(s);
 
 
@@ -41,7 +40,6 @@ char CSquare::keyshape()
 void CSquare::MoveFig(Point P)
 {
 	//check if figure out of the drawing area
-	set_center(Center);
 	if (P.x + 100 > UI.width - 15)       // UI.width-15 --> because of UI.Width is not enough
 	{
 		P.x = UI.width - 15 - 100;
@@ -67,10 +65,6 @@ Point CSquare::get_center()
 	return Center;
 }
 
-void CSquare::set_center(Point p)
-{
-	center_undo = p;
-}
 void CSquare::save(ofstream& Outputfile)
 {
 	Outputfile << FigerName << " " << ID << " " << Center.x << " " << Center.y << " " << GetColor(FigGfxInfo.DrawClr) << " " << GetColor(FigGfxInfo.FillClr) << " " << FigGfxInfo.isFilled << endl;

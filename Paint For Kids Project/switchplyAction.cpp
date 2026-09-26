@@ -18,7 +18,6 @@ void switchplyAction::Execute()
 {
 	 Output* pOut = pManager->GetOutput();
 	 pOut->PrintMessage("switch to play mode");
-	 pManager->setArryFig(pManager->GetFigCount());
 	 pOut->Cleartoolbar();
 	 pOut->CreatePlayToolBar();
 }

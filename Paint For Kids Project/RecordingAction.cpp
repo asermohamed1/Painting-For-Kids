@@ -28,7 +28,6 @@ void RecordingAction::ReadActionParameters()
 		{
 			Input* input = pManager->GetInput();
 			ActionType a = input->GetUserAction();
-			ActionType* p = new ActionType(a);
 			Point point{};
 
 			while (a == RECORD)      //i can't do a record to the record(special case)
@@ -39,8 +38,6 @@ void RecordingAction::ReadActionParameters()
 			if (a == EXIT)          //can't be recorded (special case)
 			{
 				output->PrintMessage("you will close the program");
-				delete p;
-				p = NULL;
 				pManager->ExecuteAction(a);
 				break;
 			}
@@ -51,8 +48,6 @@ void RecordingAction::ReadActionParameters()
 			else if (a == STOPRECORD)    //finish record  (special case)
 			{
 				pManager->setrecord(false);
-				delete p;
-				p = NULL;
 				pManager->ExecuteAction(a);
 				break;
 			}
@@ -93,78 +88,26 @@ void RecordingAction::ReadActionParameters()
 			}
 			else
 			{
-				//Action* act = NULL;
 				switch (a)
 				{
-				case Select:
+				case Select: case DRAW_RECT: case SQUARE: case Triangle: case HEXA: case CIRCLE:
+				case ERASE: case MOVE: case UNDO: case REDO:
 					pManager->ExecuteAction(a);
 					break;
-				case DRAW_RECT:
-					pManager->ExecuteAction(a);
-					break;
-				case SQUARE:
-					pManager->ExecuteAction(a);
-					break;
-				case Triangle:
-					pManager->ExecuteAction(a);
-					break;
-				case HEXA:
-					pManager->ExecuteAction(a);
-					break;
-				case CIRCLE:
-					pManager->ExecuteAction(a);
-					break;
-				case ERASE:
-				{
-					pManager->ExecuteAction(a);
-					break;
-				}
-				case FILLCOLOUR:
+				case FILLCOLOUR: case PENCIL:
 					if (pManager->ifselected())
-					{
 						pManager->ExecuteAction(a);
-						break;
-					}
 					else
-					{
 						output->PrintMessage("i didnt record this action ,please select the figure you want first");
-						break;
-					}
-				case PENCIL:
-					if (pManager->ifselected())
-					{
-						pManager->ExecuteAction(a);
-						break;
-					}
-					else
-					{
-						output->PrintMessage("i didnt record this action ,please select the figure you want first");
-						break;
-					}
-				case MOVE:
-					{
-						pManager->ExecuteAction(a);
-						break;
-					}
-				case UNDO:
-					{
-						pManager->ExecuteAction(a);
-						break;
-					}
-				case REDO:
-					{
-						pManager->ExecuteAction(a);
-						break;
-					}
-
+					break;
+				default:
+					break;
 				}
 					performed++;
 					output->PrintMessage("we have recorded " + to_string(performed) + " operations");
 					pManager->UpdateInterface();
 			}
 
-		delete p;
-		p = NULL;
 		}
 		pManager->setrecord(false);
 		output->PrintMessage("The record has been finished and your number of operations are: " + to_string(performed));
