@@ -1,0 +1,9 @@
+# Visual Studio build output and local state
+Debug/
+Release/
+.vs/
+*.obj
+*.pdb
+*.ilk
+*.idb
+*.tlog
